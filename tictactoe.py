@@ -23,17 +23,17 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
-    xAmount = 0
-    oAmount = 0
+    x_amount = 0
+    o_amount = 0
     for i in board:
         for j in i:
             if j == X:
-                xAmount += 1
+                x_amount += 1
             if j == O:
-                oAmount += 1
-    if xAmount > oAmount:
+                o_amount += 1
+    if x_amount > o_amount:
         return O
-    elif oAmount == xAmount:
+    elif o_amount == x_amount:
         return X
     raise NotImplementedError
 
@@ -42,13 +42,13 @@ def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    resultset = set()
+    result_set = set()
     for i in range(3):
         for j in range(3):
             if board[i][j] == EMPTY:
-                resultset.add((i,j))
+                result_set.add((i,j))
 
-    return resultset
+    return result_set
                 
     raise NotImplementedError
 
@@ -57,11 +57,11 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    boardDeepCopy = copy.deepcopy(board)
+    board_deep_copy = copy.deepcopy(board)
     i = action[0]
     j = action[1]
-    boardDeepCopy[i][j] = player(board)
-    return boardDeepCopy
+    board_deep_copy[i][j] = player(board)
+    return board_deep_copy
     raise RuntimeError from exc
 
 
@@ -117,46 +117,26 @@ def utility(board):
 
 def minimax(board):
     is_max = player(board) == X
-    bestValue = math.inf * (-1 if is_max else 1)
+    best_value = math.inf * (-1 if is_max else 1)
     for move in actions(board):
-        value = minmaxvalue(result(board,move),is_max)
-        if (value > bestValue and is_max) or (value < bestValue and not is_max):
+        value = minmaxvalue(result(board,move),is_max,1)
+        if (value > best_value and is_max) or (value < best_value and not is_max):
             action = move
-            #print(value,"in", action, "is better than",bestValue)
-            bestValue = value
-    #print("DECIDED ON ACTION:",action,"WITH VALUE:",bestValue)
+            print(value,"in", action, "is better than",best_value)
+            print("Is max?",is_max)
+            best_value = value
+    print("DECIDED ON ACTION:",action,"WITH VALUE:",best_value)
     return action
 
 
-# def minmaxvalue(board,ismax):
-#     value = 0
-#     if terminal(board):
-#         return utility(board)
-#     values = [minmaxvalue(result(board,action),not ismax) for action in actions(board)]
-#     values = sorted(values)
-#     bestValue = max(values) if ismax else min(values)
-#     print(bestValue)
-#     return bestValue
-
-# def minmaxvalue(board,ismax,depth):
-#     value = 0
-#     if terminal(board):
-#         return utility(board)
-#     for action in actions(board):
-#         depth += 1
-#         value += minmaxvalue(result(board,action),not ismax,depth)
-#         depth -= 1
-#     print(value,value-depth)
-#     return value-depth
-
-
-def minmaxvalue(board,ismax,depth):
+def minmaxvalue(board,is_max,depth):
     value = 0
     if terminal(board):
         return utility(board)
     values = []
     for action in actions(board):
-        values.append(minmaxvalue(result(board,action),not ismax))
-    best_value = max(values) if ismax else min(values)
-    print(values,best_value,ismax)
-    return best_value
+        depth += 1
+        value += minmaxvalue(result(board,action),not is_max,depth)
+        depth -= 1
+    value += -depth if is_max else depth
+    return value
